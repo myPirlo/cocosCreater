@@ -9,6 +9,10 @@ cc.Class({
         maxMoveSpeed: 0,
         // 加速度
         accel: 0,
+        jumpAudio: {
+            default: null,
+            type: cc.AudioClip
+        },
     },
 
     setJumpAction: function () {
@@ -16,8 +20,14 @@ cc.Class({
         var jumpUp = cc.moveBy(this.jumpDuration, cc.v2(0, this.jumpHeight)).easing(cc.easeCubicActionOut());
         // 下落
         var jumpDown = cc.moveBy(this.jumpDuration, cc.v2(0, -this.jumpHeight)).easing(cc.easeCubicActionIn());
-        // 不断重复
-        return cc.repeatForever(cc.sequence(jumpUp, jumpDown));
+        // 添加一个回调函数，用于在动作结束时调用我们定义的其他方法
+        var callback = cc.callFunc(this.playJumpSound, this);
+        // 不断重复，而且每次完成落地动作后调用回调来播放声音
+        return cc.repeatForever(cc.sequence(jumpUp, jumpDown, callback));
+    },
+    playJumpSound: function () {
+        // 调用声音引擎播放声音
+        cc.audioEngine.playEffect(this.jumpAudio, false);
     },
     //键盘按下
     onKeyDown (event) {
